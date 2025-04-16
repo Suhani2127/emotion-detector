@@ -12,17 +12,10 @@ import re
 # -------------------------------
 # Dummy credentials (in-memory)
 # -------------------------------
-if "users" not in st.session_state:
-    st.session_state["users"] = {"admin": "1234"}  # default user
-
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-
-if "emotion_history" not in st.session_state:
-    st.session_state["emotion_history"] = {}
-
-if "journal_entries" not in st.session_state:
-    st.session_state["journal_entries"] = {}
+st.session_state.setdefault("users", {"admin": "1234"})  # default user
+st.session_state.setdefault("logged_in", False)
+st.session_state.setdefault("emotion_history", {})
+st.session_state.setdefault("journal_entries", {})
 
 # -------------------------------
 # Emotion Analysis Logic
