@@ -5,8 +5,4 @@ seaborn
 pandas
 transformers
 torch
-openai
-calendar
-openai
-text2emotion
-numpy
+
