@@ -159,12 +159,14 @@ textarea, input {
     pointer-events: none;
     z-index: 9999;
 }
+<style>
 .emoji-rain span {
     position: absolute;
     font-size: 3rem;
-    animation: fall linear 5s forward;
+    animation: fall linear 5s forwards;  /* 'forwards' instead of 'forward' */
     opacity: 1;
 }
+
 @keyframes fall {
     0% {
         transform: translateY(-100px) rotate(0deg);
@@ -173,6 +175,9 @@ textarea, input {
     100% {
         transform: translateY(120vh) rotate(360deg);
         opacity: 0.8;
+    }
+
+
     }
 }
 </style>
