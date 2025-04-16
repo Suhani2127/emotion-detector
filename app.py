@@ -1,10 +1,10 @@
+
 import streamlit as st
 import matplotlib.pyplot as plt
 import calendar
 import datetime
 import random
 import openai
-import text2emotion as te
 from transformers import pipeline
 import numpy as np
 
@@ -74,11 +74,6 @@ def get_emotion(text):
         top = results[0]
         return top['label'], round(top['score'], 2)
     except:
-        st.warning("Primary model failed, using fallback classifier.")
-        emo = te.get_emotion(text)
-        if emo:
-            label = max(emo, key=emo.get)
-            return label, round(emo[label], 2)
         return "unknown", 0.0
 
 def generate_gpt_reply(user_input):
