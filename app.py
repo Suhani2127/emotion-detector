@@ -97,23 +97,10 @@ textarea, input {
     pointer-events: none;
     z-index: 9999;
 }
-.emoji-rain span {
-    position: absolute;
-    font-size: 3rem;
-    animation: fall linear infinite;
-    opacity: 1;
-}
-@keyframes fall {
-    0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(120vh) rotate(360deg);
-        opacity: 0.8;
-    }
-}
-</style>
+st.markdown(f"""
+<div class="emoji-rain">
+    {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
+</div>
 """, unsafe_allow_html=True)
 
 
