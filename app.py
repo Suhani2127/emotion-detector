@@ -42,11 +42,11 @@ def get_emotion(text):
         return "Very Negative", polarity
 
 emotion_map = {
-    "Very Positive": {"emoji": "😄", "color": "#DFF6E2", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
-    "Positive": {"emoji": "🙂", "color": "#E0F7FF", "response": "Glad to hear you're feeling good today! Keep going 💪"},
-    "Neutral": {"emoji": "😐", "color": "#F4F4F4", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
-    "Negative": {"emoji": "🙁", "color": "#FFF3CD", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
-    "Very Negative": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
+    "Very Positive": {"emoji": "😄", "color": "#13c22a", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
+    "Positive": {"emoji": "🙂", "color": "#139cc2", "response": "Glad to hear you're feeling good today! Keep going 💪"},
+    "Neutral": {"emoji": "😐", "color": "#abc213", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
+    "Negative": {"emoji": "🙁", "color": "#c2135c", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
+    "Very Negative": {"emoji": "😢", "color": "#c21319", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
 }
 
 therapist_replies = [
@@ -122,8 +122,8 @@ def highlight_text(text):
     return text
 
 def emotion_therapist():
-    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>AI Emotion Analyser </h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond to best of my abilities</p>", unsafe_allow_html=True)
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
@@ -148,7 +148,7 @@ def emotion_therapist():
         st.session_state["emotion_history"][username][today] = emotion
 
         st.markdown("---")
-        st.subheader("💬 AI Therapist Says:")
+        st.subheader("💬 Record the answers to:")
         st.info(random.choice(therapist_replies))
 
         # Journal Section
