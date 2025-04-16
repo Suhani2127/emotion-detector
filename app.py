@@ -163,7 +163,7 @@ textarea, input {
 .emoji-rain span {
     position: absolute;
     font-size: 3rem;
-    animation: fall linear 5s forwards;  /* 'forwards' instead of 'forward' */
+    animation: fall linear 5s forward;  /* 'forwards' instead of 'forward' */
     opacity: 1;
 }
 
