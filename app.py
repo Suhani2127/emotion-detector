@@ -1,122 +1,196 @@
 import streamlit as st
-import random
+import matplotlib.pyplot as plt
+import calendar
 import datetime
+import random
+import openai
+from transformers import pipeline
+import numpy as np
 
-# Emotion mapping for displaying response
-emotion_map = {
-    "happy": {"emoji": "😊", "color": "#FFFF00", "response": "That's wonderful! Keep smiling."},
-    "sad": {"emoji": "😢", "color": "#00BFFF", "response": "I'm sorry you're feeling down. It will get better."},
-    "angry": {"emoji": "😡", "color": "#FF4500", "response": "Take a deep breath. It’s okay to feel frustrated."},
-    "neutral": {"emoji": "😐", "color": "#808080", "response": "It’s okay to feel neutral. You’re doing well."},
-    "fear": {"emoji": "😨", "color": "#FFD700", "response": "It’s okay to feel scared. Try to relax and breathe."},
-    "surprised": {"emoji": "😲", "color": "#00FF00", "response": "Life can surprise us! Embrace it."},
-    "disgust": {"emoji": "🤢", "color": "#FF6347", "response": "It’s normal to feel disgust. Let it pass."},
+# Setup emotion classifier
+emotion_classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", top_k=3)
+
+# Emoji mapping for emotions
+emoji_map = {
+    "anger": "😠",
+    "disgust": "🤢",
+    "fear": "😨",
+    "joy": "😊",
+    "sadness": "😢",
+    "surprise": "😲",
+    "neutral": "😐",
+    "happy": "😄",
+    "love": "❤️",
+    "worry": "😟"
 }
 
-# Sample therapist replies
+# Sample fallback responses
 therapist_replies = [
-    "You're doing great, remember to be kind to yourself.",
-    "It's okay to feel this way. Take your time.",
-    "Feelings are valid, embrace them with compassion.",
-    "Everything will get better soon, stay strong!"
+    "I'm here for you. Would you like to talk more about it?",
+    "That's completely valid. It's okay to feel that way.",
+    "Let's try to take a deep breath together. In and out.",
+    "What do you think triggered this emotion today?",
+    "You're doing better than you think."
 ]
 
-# Function to detect emotion (Dummy function for now)
-def get_emotion(user_input):
-    # This function will return emotion and confidence score based on user input
-    # For the sake of this example, let's randomly choose an emotion
-    emotions = list(emotion_map.keys())
-    emotion = random.choice(emotions)
-    score = round(random.uniform(0.7, 1.0), 2)
-    return emotion, score
+# Configure OpenAI key
+if "openai_api_key" not in st.session_state:
+    st.session_state["openai_api_key"] = ""
+openai.api_key = st.session_state["openai_api_key"]
 
-# Highlight important words in journal text (Dummy function for now)
-def highlight_text(text):
-    # Add simple highlighting (e.g., bold)
-    return text.replace("important", "**important**").replace("remember", "**remember**")
+# Memory of user logins (simulated)
+users = {"testuser": "password"}
 
-# Main emotion therapist function
-def emotion_therapist():
-    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
+# Session state for login
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
 
-    # Adding a unique key to the text area widget for user input
-    user_input = st.text_area("💬 How are you feeling today?", key="user_input_1")
-    
-    if user_input:
-        emotion, score = get_emotion(user_input)
-        info = emotion_map.get(emotion, {"emoji": "❓", "color": "#eee", "response": "I'm not sure how to categorize that emotion."})
-
-        # Emoji Rain
-        st.markdown(f"""
-        <div class="emoji-rain">
-            {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown(f"""
-            <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
-                <h2 style='color:#111;'>{info['emoji']} {emotion.capitalize()}</h2>
-                <p><strong>Confidence:</strong> {score}</p>
-                <hr />
-                <p style='font-size: 1.1rem;'>{info['response']}</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-        st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
-
-        today = datetime.date.today().strftime("%Y-%m-%d")
-        username = st.session_state.get("username", "default")
-        if username not in st.session_state["emotion_history"]:
-            st.session_state["emotion_history"][username] = {}
-        st.session_state["emotion_history"][username][today] = emotion
-
-        st.markdown("---")
-        st.subheader("💬 AI Therapist Says:")
-        st.info(random.choice(therapist_replies))
-
-        # Journal Section with unique key for text area
-        st.markdown("---")
-        st.subheader("📓 Journal Entry")
-        journal = st.text_area("Write a short journal entry to reflect on your thoughts:", key="journal_entry_1")
-        if st.button("Save Journal"):
-            if username not in st.session_state["journal_entries"]:
-                st.session_state["journal_entries"][username] = {}
-            st.session_state["journal_entries"][username][today] = {
-                "text": journal,
-                "emotion": emotion
-            }
-            st.success("Journal saved successfully ✨")
-
-    st.markdown("---")
-    st.subheader("📅 Your Emotion History")
-
-    selected_date = st.date_input("Pick a date to view past emotion")
-    username = st.session_state.get("username", "default")
-    history = st.session_state["emotion_history"].get(username, {})
-    date_str = selected_date.strftime("%Y-%m-%d")
-
-    if date_str in history:
-        past_emotion = history[date_str]
-        past_info = emotion_map.get(past_emotion, {"emoji": "❓"})
-        st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
-
-        journal_entries = st.session_state["journal_entries"].get(username, {})
-        if date_str in journal_entries:
-            st.markdown("---")
-            st.markdown("### 📝 Journal Reflection:")
-            highlighted = highlight_text(journal_entries[date_str]["text"])
-            st.markdown(highlighted)
-    else:
-        st.info("No emotion entry recorded for this date.")
-
-# Ensure these variables are initialized before usage
+# Storage for emotion history
 if "emotion_history" not in st.session_state:
-    st.session_state["emotion_history"] = {}
+    st.session_state.emotion_history = {}
 
-if "journal_entries" not in st.session_state:
-    st.session_state["journal_entries"] = {}
+def login_page():
+    st.title("🔐 Login to AI Emotion Therapist")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if username in users and users[username] == password:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.success("Logged in successfully!")
+        else:
+            st.error("Invalid username or password")
+    st.markdown("---")
+    st.subheader("🔑 Enter OpenAI API Key (optional for advanced replies)")
+    st.session_state["openai_api_key"] = st.text_input("API Key", type="password")
 
-# Run the emotion therapist function
-emotion_therapist()
+def get_emotion(text):
+    try:
+        results = emotion_classifier(text)[0]
+        results.sort(key=lambda x: x['score'], reverse=True)
+        top = results[0]
+        return top['label'], round(top['score'], 2)
+    except:
+        return "unknown", 0.0
+
+def generate_gpt_reply(user_input):
+    if not openai.api_key:
+        return random.choice(therapist_replies)
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a kind and empathetic mental health therapist."},
+                {"role": "user", "content": user_input}
+            ],
+            max_tokens=100,
+            temperature=0.7
+        )
+        return response.choices[0].message["content"].strip()
+    except:
+        return random.choice(therapist_replies)
+
+def emotion_therapist():
+    st.title("🧠 AI Emotion Therapist")
+    st.write("How are you feeling today?")
+    user_input = st.text_area("Describe your mood or thoughts:")
+
+    if st.button("Analyze Emotion"):
+        if user_input:
+            emotion, score = get_emotion(user_input)
+            emoji = emoji_map.get(emotion.lower(), "❓")
+            st.subheader(f"Detected Emotion: {emotion} {emoji} ({score})")
+
+            # Save history
+            today = datetime.date.today()
+            st.session_state.emotion_history[str(today)] = emotion
+
+            # GPT therapist reply
+            st.subheader("💬 AI Therapist Says:")
+            response = generate_gpt_reply(user_input)
+            st.info(response)
+
+            # Emoji explosion effect (rain across screen)
+            st.markdown("""
+                <style>
+                .emoji-rain {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    z-index: 9999;
+                    pointer-events: none;
+                    overflow: hidden;
+                }
+                .emoji-rain span {
+                    font-size: 3rem;
+                    animation: fall 3s linear infinite;
+                    position: absolute;
+                    top: -10%;
+                    opacity: 1;
+                }
+                @keyframes fall {
+                    to {
+                        transform: translateY(110vh);
+                        opacity: 0;
+                    }
+                }
+                </style>
+                <div class="emoji-rain">
+                """ + "".join([
+                    f'<span style="left:{random.randint(0, 100)}vw">{emoji}</span>' for _ in range(30)
+                ]) + "</div>", unsafe_allow_html=True)
+
+def calendar_heatmap():
+    st.title("📅 Emotion History")
+    today = datetime.date.today()
+    year = today.year
+    month = today.month
+    cal = calendar.monthcalendar(year, month)
+
+    data = np.zeros((len(cal), 7))
+    emotion_colors = {
+        "joy": "#ffe066", "sadness": "#74c0fc", "anger": "#fa5252",
+        "fear": "#7950f2", "surprise": "#63e6be", "neutral": "#dee2e6",
+        "happy": "#ffd43b", "love": "#ff8787", "worry": "#ffa94d"
+    }
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.set_title(f"{calendar.month_name[month]} {year}", fontsize=16)
+    ax.axis("off")
+
+    for i, week in enumerate(cal):
+        for j, day in enumerate(week):
+            if day != 0:
+                date_str = str(datetime.date(year, month, day))
+                emotion = st.session_state.emotion_history.get(date_str, "")
+                color = emotion_colors.get(emotion, "#f1f3f5")
+                rect = plt.Rectangle([j, -i], 1, 1, facecolor=color, edgecolor="white")
+                ax.add_patch(rect)
+                ax.text(j + 0.5, -i + 0.5, str(day), ha="center", va="center", fontsize=10)
+
+    st.pyplot(fig)
+
+def main():
+    if not st.session_state.logged_in:
+        login_page()
+        return
+
+    menu = ["Emotion Analyzer", "Calendar Heatmap", "Logout"]
+    choice = st.sidebar.selectbox("Navigation", menu)
+
+    if choice == "Emotion Analyzer":
+        emotion_therapist()
+    elif choice == "Calendar Heatmap":
+        calendar_heatmap()
+    elif choice == "Logout":
+        st.session_state.logged_in = False
+        st.experimental_rerun()
+
+if __name__ == "__main__":
+    main()
+
 
