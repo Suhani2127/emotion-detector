@@ -151,10 +151,11 @@ textarea, input {
 }
 
 st.markdown(f"""
- <div class="emoji-rain">
-     {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
-        </div>
-        """, unsafe_allow_html=True)
+    <div class="emoji-rain">
+        {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
+    </div>
+""", unsafe_allow_html=True)
+
 
         st.markdown(f"""
             <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
@@ -207,8 +208,8 @@ def highlight_text(text):
 
 def emotion_therapist():
 
-    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Wellbeing Tracker</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with all the help i can find </p>", unsafe_allow_html=True)
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
@@ -245,11 +246,11 @@ def emotion_therapist():
         manage_emergency_contacts()
 
     st.markdown("---")
-    st.subheader("💬 AI Therapist Says:")  
+    st.subheader("💬 I suggest:")  
     st.info(random.choice(therapist_replies))
 
-    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Wellbeing Tracker</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with  all the help i can find</p>", unsafe_allow_html=True)
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
@@ -292,8 +293,8 @@ def highlight_text(text):
     return text
 
 def emotion_therapist():
-    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Wellbeing Tracker</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with  all the help i can find</p>", unsafe_allow_html=True)
 
     # Therapist Persona Selection
     if "persona" not in st.session_state:
