@@ -225,27 +225,7 @@ def emotion_therapist():
         st.info("No emotion entry recorded for this date.")
 
     # Heatmap
-    if history:
-        st.markdown("---")
-        st.subheader("📈 Monthly Emotion Heatmap")
-
-        df = pd.DataFrame(list(history.items()), columns=["Date", "Emotion"])
-        df["Date"] = pd.to_datetime(df["Date"])
-        df["Day"] = df["Date"].dt.day
-        df["Month"] = df["Date"].dt.month
-        df["Emotion Level"] = df["Emotion"].map({
-            "sadness": -2,
-            "anger": -1,
-            "fear": -1,
-            "surprise": 0,
-            "love": 1,
-            "joy": 2
-        })
-
-        heatmap_data = df.pivot_table(index="Month", columns="Day", values="Emotion Level")
-        plt.figure(figsize=(15, 3))
-        sns.heatmap(heatmap_data, cmap="coolwarm", cbar_kws={'label': 'Emotion Intensity'}, linewidths=0.5, linecolor='white')
-        st.pyplot(plt)
+    
 
     if st.button("🔓 Logout"):
         st.session_state["logged_in"] = False
