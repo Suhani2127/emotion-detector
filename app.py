@@ -1,5 +1,5 @@
 import streamlit as st
-from transformers import pipeline
+from textblob import TextBlob
 import datetime
 import random
 import calendar
@@ -7,11 +7,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import re
-
-# -------------------------------
-# Emotion Classifier with Hugging Face
-# -------------------------------
-emotion_classifier = pipeline("text-classification", model="nateraw/bert-base-uncased-emotion", return_all_scores=True)
 
 # -------------------------------
 # Dummy credentials (in-memory)
@@ -32,19 +27,25 @@ if "journal_entries" not in st.session_state:
 # Emotion Analysis Logic
 # -------------------------------
 def get_emotion(text):
-    scores = emotion_classifier(text)[0]
-    sorted_scores = sorted(scores, key=lambda x: x['score'], reverse=True)
-    top_emotion = sorted_scores[0]['label']
-    top_score = sorted_scores[0]['score']
-    return top_emotion.capitalize(), top_score
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+    if polarity > 0.5:
+        return "Very Positive", polarity
+    elif polarity > 0:
+        return "Positive", polarity
+    elif polarity == 0:
+        return "Neutral", polarity
+    elif polarity > -0.5:
+        return "Negative", polarity
+    else:
+        return "Very Negative", polarity
 
 emotion_map = {
-    "Joy": {"emoji": "😊", "color": "#E0F7FA", "response": "That’s wonderful to hear! 🌟 What made you feel joyful today?"},
-    "Sadness": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Do you want to talk about it?"},
-    "Anger": {"emoji": "😠", "color": "#FFE0B2", "response": "It's okay to feel angry. Would you like to vent or find ways to calm down?"},
-    "Love": {"emoji": "❤️", "color": "#FCE4EC", "response": "Love is such a beautiful emotion. Tell me more!"},
-    "Fear": {"emoji": "😨", "color": "#FFF3CD", "response": "It's natural to feel fear. You are safe here."},
-    "Surprise": {"emoji": "😮", "color": "#E1F5FE", "response": "Surprises can be exciting or shocking. What happened?"}
+    "Very Positive": {"emoji": "😄", "color": "#DFF6E2", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
+    "Positive": {"emoji": "🙂", "color": "#E0F7FF", "response": "Glad to hear you're feeling good today! Keep going 💪"},
+    "Neutral": {"emoji": "😐", "color": "#F4F4F4", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
+    "Negative": {"emoji": "🙁", "color": "#FFF3CD", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
+    "Very Negative": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
 }
 
 therapist_replies = [
@@ -125,19 +126,53 @@ def emotion_therapist():
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
-        emotion, score = get_emotion(user_input)
-        info = emotion_map.get(emotion, {"emoji": "🤔", "color": "#F4F4F4", "response": "I'm thinking about how you're feeling..."})
+        emotion, polarity = get_emotion(user_input)
+        info = emotion_map[emotion]
 
         st.markdown(f"""
             <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
                 <h2 style='color:#111;'>{info['emoji']} {emotion}</h2>
-                <p><strong>Confidence:</strong> {round(score * 100, 2)}%</p>
+                <p><strong>Polarity:</strong> {round(polarity, 2)}</p>
                 <hr />
                 <p style='font-size: 1.1rem;'>{info['response']}</p>
             </div>
         """, unsafe_allow_html=True)
 
         st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
+
+        # Emoji Rain Animation 🎉
+        animation_html = f"""
+        <div style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;'>
+            <div class='emoji-rain'>
+                {"".join([f"<span>{info['emoji']}</span>" for _ in range(50)])}
+            </div>
+        </div>
+
+        <style>
+        @keyframes fall {{
+            0% {{ transform: translateY(-100vh) rotate(0deg); opacity: 0; }}
+            50% {{ opacity: 1; }}
+            100% {{ transform: translateY(100vh) rotate(360deg); opacity: 0; }}
+        }}
+
+        .emoji-rain span {{
+            position: absolute;
+            animation: fall 3s linear infinite;
+            font-size: 2rem;
+            top: 0;
+            left: calc(100% * var(--i));
+            transform: translateY(-100%);
+        }}
+
+        .emoji-rain span:nth-child(odd) {{ animation-duration: 4s; }}
+        .emoji-rain span:nth-child(even) {{ animation-duration: 5s; }}
+        .emoji-rain span {{
+            left: calc(2% * var(--i));
+            animation-delay: calc(0.1s * var(--i));
+        }}
+        </style>
+        """
+        st.markdown(animation_html, unsafe_allow_html=True)
 
         today = datetime.date.today().strftime("%Y-%m-%d")
         username = st.session_state.get("username", "default")
@@ -172,7 +207,7 @@ def emotion_therapist():
 
     if date_str in history:
         past_emotion = history[date_str]
-        past_info = emotion_map.get(past_emotion, {"emoji": "🤔", "color": "#EEE"})
+        past_info = emotion_map[past_emotion]
         st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
 
         journal_entries = st.session_state["journal_entries"].get(username, {})
@@ -194,13 +229,11 @@ def emotion_therapist():
         df["Day"] = df["Date"].dt.day
         df["Month"] = df["Date"].dt.month
         df["Emotion Level"] = df["Emotion"].map({
-            "Sadness": -2,
-            "Fear": -1,
+            "Very Negative": -2,
+            "Negative": -1,
             "Neutral": 0,
-            "Joy": 2,
-            "Anger": -1,
-            "Surprise": 1,
-            "Love": 2
+            "Positive": 1,
+            "Very Positive": 2
         })
 
         heatmap_data = df.pivot_table(index="Month", columns="Day", values="Emotion Level")
@@ -219,4 +252,3 @@ if not st.session_state["logged_in"]:
     login_page()
 else:
     emotion_therapist()
-
