@@ -55,9 +55,7 @@ therapist_personas = {
     "fear": "The Guide"
 }
 
-# -------------------------------
 # Wellness Tips Based on Emotions
-# -------------------------------
 wellness_tips = {
     "joy": "Keep the positivity flowing! Take some time to appreciate the little things and keep nurturing your joy.",
     "love": "Spread the love! Practice acts of kindness and nurture your relationships with loved ones.",
@@ -115,6 +113,20 @@ textarea, input {
         opacity: 0.8;
     }
 }
+.navbar {
+    background-color: #f1f1f1;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+.navbar a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -149,12 +161,14 @@ def login_page():
 # -------------------------------
 # Emotion Therapist Page
 # -------------------------------
-def highlight_text(text):
-    for word in ["sad", "happy", "tired", "anxious", "hopeful", "angry", "excited", "lonely"]:
-        text = re.sub(f"\\b{word}\\b", f"**:blue[{word}]**", text, flags=re.IGNORECASE)
-    return text
-
 def emotion_therapist():
+    st.markdown("""
+    <div class="navbar">
+        <a href="#">Therapist Persona</a>
+        <a href="#">Emergency Contacts</a>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
@@ -163,7 +177,6 @@ def emotion_therapist():
         emotion, score = get_emotion(user_input)
         info = emotion_map.get(emotion, {"emoji": "❓", "color": "#eee", "response": "I'm not sure how to categorize that emotion."})
 
-        # Emoji Rain
         st.markdown(f"""
         <div class="emoji-rain">
             {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
@@ -181,14 +194,12 @@ def emotion_therapist():
 
         st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
 
-        # Wellness Tip
         st.markdown(f"### 🧘 Wellness Tip:")
         st.markdown(wellness_tips.get(emotion, "Take care of yourself, every step counts."))
 
-        # Therapist Persona
         persona = therapist_personas.get(emotion, "The Listener")
         st.markdown(f"### Therapist Persona: **{persona}**")
-        
+
         today = datetime.date.today().strftime("%Y-%m-%d")
         username = st.session_state.get("username", "default")
         if username not in st.session_state["emotion_history"]:
@@ -197,9 +208,8 @@ def emotion_therapist():
 
         st.markdown("---")
         st.subheader("💬 AI Therapist Says:")
-        st.info(f"**{persona}:** {random.choice([f'Tell me more about that...', f'What do you think is causing this feeling?', 'I’m here to listen and support you.', 'It’s okay to feel this way, you’re not alone.'])}")
+        st.info(f"**{persona}:** {random.choice(['Tell me more about that...', 'What do you think is causing this feeling?', 'I’m here to listen and support you.', 'It’s okay to feel this way, you’re not alone.'])}")
 
-        # Journal Section
         st.markdown("---")
         st.subheader("📓 Journal Entry")
         journal = st.text_area("Write a short journal entry to reflect on your thoughts:")
@@ -208,8 +218,7 @@ def emotion_therapist():
                 st.session_state["journal_entries"][username] = {}
             st.session_state["journal_entries"][username][today] = journal
             st.success("Journal entry saved!")
-        
-        # View Emotion History
+
         st.markdown("---")
         st.subheader("📅 Emotion History")
         if username in st.session_state["emotion_history"]:
@@ -221,4 +230,5 @@ if not st.session_state["logged_in"]:
     login_page()
 else:
     emotion_therapist()
+
 
