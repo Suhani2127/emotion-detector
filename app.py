@@ -67,7 +67,7 @@ highlight_keywords = ["sad", "happy", "tired", "anxious", "hopeful", "angry", "e
 
 # -------------------------------
 # Styling
-# -------------------------------
+
 st.markdown("""
 <style>
 html, body, .main {
@@ -99,16 +99,23 @@ textarea, input {
 }
 .emoji-rain span {
     position: absolute;
-    animation: fall 4s linear infinite;
     font-size: 3rem;
-    opacity: 0.95;
+    animation: fall linear infinite;
+    opacity: 1;
 }
 @keyframes fall {
-    0% { transform: translateY(-100px); opacity: 1; }
-    100% { transform: translateY(100vh); opacity: 0; }
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(120vh) rotate(360deg);
+        opacity: 0.8;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # -------------------------------
 # Auth Page
