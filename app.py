@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import re
+from transformers import pipeline
+
+# Load advanced emotion classifier
+emotion_classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", return_all_scores=True)
 
 # -------------------------------
 # Dummy credentials (in-memory)
@@ -27,25 +31,18 @@ if "journal_entries" not in st.session_state:
 # Emotion Analysis Logic
 # -------------------------------
 def get_emotion(text):
-    blob = TextBlob(text)
-    polarity = blob.sentiment.polarity
-    if polarity > 0.5:
-        return "Very Positive", polarity
-    elif polarity > 0:
-        return "Positive", polarity
-    elif polarity == 0:
-        return "Neutral", polarity
-    elif polarity > -0.5:
-        return "Negative", polarity
-    else:
-        return "Very Negative", polarity
+    results = emotion_classifier(text)[0]
+    results.sort(key=lambda x: x['score'], reverse=True)
+    top = results[0]
+    return top['label'], round(top['score'], 2)
 
 emotion_map = {
-    "Very Positive": {"emoji": "😄", "color": "#DFF6E2", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
-    "Positive": {"emoji": "🙂", "color": "#E0F7FF", "response": "Glad to hear you're feeling good today! Keep going 💪"},
-    "Neutral": {"emoji": "😐", "color": "#F4F4F4", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
-    "Negative": {"emoji": "🙁", "color": "#FFF3CD", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
-    "Very Negative": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
+    "joy": {"emoji": "😄", "color": "#DFF6E2", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
+    "love": {"emoji": "❤️", "color": "#FFE3E3", "response": "That’s lovely. Spread the love! 🌈"},
+    "surprise": {"emoji": "😲", "color": "#E0F7FF", "response": "Surprises can be exciting or shocking! Let’s talk more."},
+    "anger": {"emoji": "😠", "color": "#FFD6D6", "response": "It’s okay to feel angry. Let’s try to unpack that together."},
+    "sadness": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"},
+    "fear": {"emoji": "😨", "color": "#EAEAFF", "response": "Fear is a powerful emotion. Let's work through it together."}
 }
 
 therapist_replies = [
@@ -80,6 +77,26 @@ textarea, input {
     color: white;
     border-radius: 8px;
     padding: 0.5em 1em;
+}
+.emoji-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 9999;
+}
+.emoji-rain span {
+    position: absolute;
+    animation: fall 3s linear infinite;
+    font-size: 2rem;
+    opacity: 0.9;
+}
+@keyframes fall {
+    0% { transform: translateY(-10%); opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -126,53 +143,26 @@ def emotion_therapist():
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
-        emotion, polarity = get_emotion(user_input)
-        info = emotion_map[emotion]
+        emotion, score = get_emotion(user_input)
+        info = emotion_map.get(emotion, {"emoji": "❓", "color": "#eee", "response": "I'm not sure how to categorize that emotion."})
+
+        # Emoji Rain
+        st.markdown(f"""
+        <div class="emoji-rain">
+            {''.join([f"<span style='left:{random.randint(0, 100)}vw'>{info['emoji']}</span>" for _ in range(30)])}
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown(f"""
             <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
-                <h2 style='color:#111;'>{info['emoji']} {emotion}</h2>
-                <p><strong>Polarity:</strong> {round(polarity, 2)}</p>
+                <h2 style='color:#111;'>{info['emoji']} {emotion.capitalize()}</h2>
+                <p><strong>Confidence:</strong> {score}</p>
                 <hr />
                 <p style='font-size: 1.1rem;'>{info['response']}</p>
             </div>
         """, unsafe_allow_html=True)
 
         st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
-
-        # Emoji Rain Animation 🎉
-        animation_html = f"""
-        <div style='position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;'>
-            <div class='emoji-rain'>
-                {"".join([f"<span>{info['emoji']}</span>" for _ in range(50)])}
-            </div>
-        </div>
-
-        <style>
-        @keyframes fall {{
-            0% {{ transform: translateY(-100vh) rotate(0deg); opacity: 0; }}
-            50% {{ opacity: 1; }}
-            100% {{ transform: translateY(100vh) rotate(360deg); opacity: 0; }}
-        }}
-
-        .emoji-rain span {{
-            position: absolute;
-            animation: fall 3s linear infinite;
-            font-size: 2rem;
-            top: 0;
-            left: calc(100% * var(--i));
-            transform: translateY(-100%);
-        }}
-
-        .emoji-rain span:nth-child(odd) {{ animation-duration: 4s; }}
-        .emoji-rain span:nth-child(even) {{ animation-duration: 5s; }}
-        .emoji-rain span {{
-            left: calc(2% * var(--i));
-            animation-delay: calc(0.1s * var(--i));
-        }}
-        </style>
-        """
-        st.markdown(animation_html, unsafe_allow_html=True)
 
         today = datetime.date.today().strftime("%Y-%m-%d")
         username = st.session_state.get("username", "default")
@@ -207,7 +197,7 @@ def emotion_therapist():
 
     if date_str in history:
         past_emotion = history[date_str]
-        past_info = emotion_map[past_emotion]
+        past_info = emotion_map.get(past_emotion, {"emoji": "❓"})
         st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
 
         journal_entries = st.session_state["journal_entries"].get(username, {})
@@ -229,11 +219,12 @@ def emotion_therapist():
         df["Day"] = df["Date"].dt.day
         df["Month"] = df["Date"].dt.month
         df["Emotion Level"] = df["Emotion"].map({
-            "Very Negative": -2,
-            "Negative": -1,
-            "Neutral": 0,
-            "Positive": 1,
-            "Very Positive": 2
+            "sadness": -2,
+            "anger": -1,
+            "fear": -1,
+            "surprise": 0,
+            "love": 1,
+            "joy": 2
         })
 
         heatmap_data = df.pivot_table(index="Month", columns="Day", values="Emotion Level")
