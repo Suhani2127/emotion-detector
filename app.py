@@ -45,6 +45,15 @@ emotion_map = {
     "fear": {"emoji": "😨", "color": "#EAEAFF", "response": "Fear is a powerful emotion. Let's work through it together."}
 }
 
+mental_health_tips = {
+    "joy": ["Savor the moment with gratitude journaling.", "Share your happiness with someone—it amplifies the feeling!"],
+    "love": ["Send a kind message to someone you care about today.", "Practice self-love through affirmations or a relaxing activity."],
+    "surprise": ["Take a moment to breathe—surprises can bring growth!", "Write down your feelings—it helps make sense of the unexpected."],
+    "anger": ["Take a walk or do a quick stretch to release tension.", "Try deep breathing: inhale for 4, hold for 4, exhale for 6."],
+    "sadness": ["Watch or listen to something that brings you comfort.", "Reach out to a friend or write down how you’re feeling."],
+    "fear": ["Ground yourself with the 5-4-3-2-1 technique (see, hear, feel, smell, taste).", "Face fears gradually—small steps make a big impact."]
+}
+
 therapist_replies = [
     "Tell me more about that...",
     "How long have you been feeling this way?",
@@ -90,12 +99,12 @@ textarea, input {
 }
 .emoji-rain span {
     position: absolute;
-    animation: fall 3s linear infinite;
-    font-size: 2rem;
-    opacity: 0.9;
+    animation: fall 4s linear infinite;
+    font-size: 3rem;
+    opacity: 0.95;
 }
 @keyframes fall {
-    0% { transform: translateY(-10%); opacity: 1; }
+    0% { transform: translateY(-100px); opacity: 1; }
     100% { transform: translateY(100vh); opacity: 0; }
 }
 </style>
@@ -149,7 +158,7 @@ def emotion_therapist():
         # Emoji Rain
         st.markdown(f"""
         <div class="emoji-rain">
-            {''.join([f"<span style='left:{random.randint(0, 100)}vw'>{info['emoji']}</span>" for _ in range(30)])}
+            {''.join([f"<span style='left:{random.randint(0, 100)}vw'>{info['emoji']}</span>" for _ in range(80)])}
         </div>
         """, unsafe_allow_html=True)
 
@@ -173,6 +182,12 @@ def emotion_therapist():
         st.markdown("---")
         st.subheader("💬 AI Therapist Says:")
         st.info(random.choice(therapist_replies))
+
+        # Mental health tips
+        if emotion in mental_health_tips:
+            st.markdown("---")
+            st.subheader("🧘 Mental Health Tip:")
+            st.success(random.choice(mental_health_tips[emotion]))
 
         # Journal Section
         st.markdown("---")
@@ -243,3 +258,4 @@ if not st.session_state["logged_in"]:
     login_page()
 else:
     emotion_therapist()
+
