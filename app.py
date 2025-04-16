@@ -227,11 +227,12 @@ def highlight_text(text):
     return text
 
 
+
 def emotion_therapist():
     st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
-    user_input = st.text_area("💬 How are you feeling today?", key="feeling_input")
+    user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
         emotion, score = get_emotion(user_input)
         info = emotion_map.get(emotion, {"emoji": "❓", "color": "#eee", "response": "I'm not sure how to categorize that emotion."})
@@ -252,44 +253,43 @@ def emotion_therapist():
             </div>
         """, unsafe_allow_html=True)
 
-        # Wellness Resources Section
-        st.markdown("---")
-        st.subheader("💆‍♀️ Wellness Resources")
+        st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
 
-        # Meditation Suggestion
-        display_meditation(emotion)
+        # Wellness Tip
+        st.markdown(f"### 🧘 Wellness Tip:")
+        st.markdown(wellness_tips.get(emotion, "Take care of yourself, every step counts."))
 
-        # Affirmation
-        display_affirmation(emotion)
+        # Therapist Persona
+        persona = therapist_personas.get(emotion, "The Listener")
+        st.markdown(f"### Therapist Persona: **{persona}**")
+        
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        username = st.session_state.get("username", "default")
+        if username not in st.session_state["emotion_history"]:
+            st.session_state["emotion_history"][username] = {}
+        st.session_state["emotion_history"][username][today] = emotion
 
-        # Emergency Contacts
-        manage_emergency_contacts()
-
-        # AI Therapist Quote
         st.markdown("---")
         st.subheader("💬 AI Therapist Says:")
-        st.info(random.choice(therapist_replies))
+        st.info(f"**{persona}:** {random.choice([f'Tell me more about that...', f'What do you think is causing this feeling?', 'I’m here to listen and support you.', 'It’s okay to feel this way, you’re not alone.'])}")
 
         # Journal Section
         st.markdown("---")
         st.subheader("📓 Journal Entry")
-
-        journal = st.text_area("Write a short journal entry to reflect on your thoughts:", key="journal_input")
+        journal = st.text_area("Write a short journal entry to reflect on your thoughts:")
         if st.button("Save Journal"):
-            username = st.session_state.get("username", "guest")
-            today = str(datetime.date.today())
-
             if username not in st.session_state["journal_entries"]:
                 st.session_state["journal_entries"][username] = {}
-
-            st.session_state["journal_entries"][username][today] = {
-                "text": journal,
-                "emotion": emotion
-            }
-            st.success("Journal saved successfully ✨")
-
-      
-    st.markdown("---")
+            st.session_state["journal_entries"][username][today] = journal
+            st.success("Journal entry saved!")
+        
+   # View Emotion History
+        st.markdown("---")
+        st.subheader("📅 Emotion History")
+        if username in st.session_state["emotion_history"]:
+            history = st.session_state["emotion_history"][username]
+            history_df = pd.DataFrame(list(history.items()), columns=["Date", "Emotion"])
+            st.dataframe(history_df)
 
 # -------------------------------
 # Main App Logic
