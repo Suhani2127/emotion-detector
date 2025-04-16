@@ -226,11 +226,12 @@ def highlight_text(text):
         text = re.sub(f"\\b{word}\\b", f"**:blue[{word}]**", text, flags=re.IGNORECASE)
     return text
 
-   def emotion_therapist():
+
+def emotion_therapist():
     st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
-    user_input = st.text_area("💬 How are you feeling today?")
+    user_input = st.text_area("💬 How are you feeling today?", key="feeling_input")
     if user_input:
         emotion, score = get_emotion(user_input)
         info = emotion_map.get(emotion, {"emoji": "❓", "color": "#eee", "response": "I'm not sure how to categorize that emotion."})
@@ -254,7 +255,7 @@ def highlight_text(text):
         # Wellness Resources Section
         st.markdown("---")
         st.subheader("💆‍♀️ Wellness Resources")
-        
+
         # Meditation Suggestion
         display_meditation(emotion)
 
@@ -264,10 +265,28 @@ def highlight_text(text):
         # Emergency Contacts
         manage_emergency_contacts()
 
-    st.markdown("---")
-    st.subheader("💬 AI Therapist Says:")  
-    st.info(random.choice(therapist_replies))
+        # AI Therapist Quote
+        st.markdown("---")
+        st.subheader("💬 AI Therapist Says:")
+        st.info(random.choice(therapist_replies))
 
+        # Journal Section
+        st.markdown("---")
+        st.subheader("📓 Journal Entry")
+
+        journal = st.text_area("Write a short journal entry to reflect on your thoughts:", key="journal_input")
+        if st.button("Save Journal"):
+            username = st.session_state.get("username", "guest")
+            today = str(datetime.date.today())
+
+            if username not in st.session_state["journal_entries"]:
+                st.session_state["journal_entries"][username] = {}
+
+            st.session_state["journal_entries"][username][today] = {
+                "text": journal,
+                "emotion": emotion
+            }
+            st.success("Journal saved successfully ✨")
 
         # Journal Section
         st.markdown("---")
