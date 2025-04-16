@@ -149,37 +149,23 @@ textarea, input {
     border-radius: 8px;
     padding: 0.5em 1em;
 }
-.emoji-rain {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 9999;
-}
-<style>
-.emoji-rain span {
-    position: absolute;
-    font-size: 3rem;
-    animation: fall linear infinite;  /* 'forwards' instead of 'forward' */
-    opacity: 1;
-}
 
-@keyframes fall {
-    0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(120vh) rotate(360deg);
-        opacity: 0.8;
-    }
+st.markdown(f"""
+        <div class="emoji-rain">
+            {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
+        </div>
+        """, unsafe_allow_html=True)
 
+        st.markdown(f"""
+            <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
+                <h2 style='color:#111;'>{info['emoji']} {emotion.capitalize()}</h2>
+                <p><strong>Confidence:</strong> {score}</p>
+                <hr />
+                <p style='font-size: 1.1rem;'>{info['response']}</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-    }
-}
+        st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
 </style>
 """, unsafe_allow_html=True)
 
