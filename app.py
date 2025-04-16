@@ -1,4 +1,4 @@
-import streamlit as st
+mport streamlit as st
 from textblob import TextBlob
 import datetime
 import random
@@ -101,7 +101,7 @@ textarea, input {
     position: absolute;
     animation: fall 4s linear infinite;
     font-size: 3rem;
-    opacity: 100;
+    opacity: 0.95;
 }
 @keyframes fall {
     0% { transform: translateY(-100px); opacity: 1; }
