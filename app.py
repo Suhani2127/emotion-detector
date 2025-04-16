@@ -151,8 +151,8 @@ textarea, input {
 }
 
 st.markdown(f"""
-        <div class="emoji-rain">
-            {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
+ <div class="emoji-rain">
+     {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
         </div>
         """, unsafe_allow_html=True)
 
