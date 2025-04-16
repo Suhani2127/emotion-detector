@@ -108,12 +108,12 @@ def get_emotion(text):
     return top['label'], round(top['score'], 2)
 
 emotion_map = {
-    "joy": {"emoji": "😄", "color": "#DFF6E2", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
-    "love": {"emoji": "❤️", "color": "#FFE3E3", "response": "That’s lovely. Spread the love! 🌈"},
-    "surprise": {"emoji": "😲", "color": "#E0F7FF", "response": "Surprises can be exciting or shocking! Let’s talk more."},
-    "anger": {"emoji": "😠", "color": "#FFD6D6", "response": "It’s okay to feel angry. Let’s try to unpack that together."},
-    "sadness": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"},
-    "fear": {"emoji": "😨", "color": "#EAEAFF", "response": "Fear is a powerful emotion. Let's work through it together."}
+    "joy": {"emoji": "😄", "color": "##faeb19", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
+    "love": {"emoji": "❤️", "color": "###fa19d8", "response": "That’s lovely. Spread the love! 🌈"},
+    "surprise": {"emoji": "😲", "color": "##fa8d19", "response": "Surprises can be exciting or shocking! Let’s talk more."},
+    "anger": {"emoji": "😠", "color": "#c21319", "response": "It’s okay to feel angry. Let’s try to unpack that together."},
+    "sadness": {"emoji": "😢", "color": "##133fc2", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"},
+    "fear": {"emoji": "😨", "color": "##042e06", "response": "Fear is a powerful emotion. Let's work through it together."}
 }
 
 therapist_replies = [
@@ -163,7 +163,7 @@ textarea, input {
 .emoji-rain span {
     position: absolute;
     font-size: 3rem;
-    animation: fall linear 5s forward;  /* 'forwards' instead of 'forward' */
+    animation: fall linear infinite;  /* 'forwards' instead of 'forward' */
     opacity: 1;
 }
 
