@@ -150,13 +150,6 @@ textarea, input {
     padding: 0.5em 1em;
 }
 
-st.markdown(f"""
-    <div class="emoji-rain">
-        {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
-    </div>
-""", unsafe_allow_html=True)
-
-
         st.markdown(f"""
             <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
                 <h2 style='color:#111;'>{info['emoji']} {emotion.capitalize()}</h2>
