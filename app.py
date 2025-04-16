@@ -260,27 +260,18 @@ def emotion_therapist():
             st.success("Journal saved successfully ✨")
 
     st.markdown("---")
-st.markdown("---")
-    st.subheader("📅 Your Emotion History")
 
-    selected_date = st.date_input("Pick a date to view past emotion")
-    username = st.session_state.get("username", "default")
-    history = st.session_state["emotion_history"].get(username, {})
-    date_str = selected_date.strftime("%Y-%m-%d")
-
-    if date_str in history:
-        past_emotion = history[date_str]
-        past_info = emotion_map.get(past_emotion, {"emoji": "❓"})
-        st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
-
-        journal_entries = st.session_state["journal_entries"].get(username, {})
-        if date_str in journal_entries:
-            st.markdown("---")
-            st.markdown("### 📝 Journal Reflection:")
-            highlighted = highlight_text(journal_entries[date_str]["text"])
-            st.markdown(highlighted)
+def display_emotion_history():
+    # Check if emotion history exists in the session state
+    if "emotion_history" in st.session_state:
+        st.subheader("📅 Your Emotion History")
+        # Display emotion history
+        for entry in st.session_state["emotion_history"]:
+            st.write(f"- {entry}")
     else:
-        st.info("No emotion entry recorded for this date.")
+        st.subheader("📅 Your Emotion History")
+        st.write("No emotions recorded yet.")
+
 
 # Meditation Options Based on Emotion
 def suggest_meditation(emotion):
