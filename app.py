@@ -215,7 +215,7 @@ def highlight_text(text):
     return text
 
 def emotion_therapist():
-    def emotion_therapist():
+
     st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
