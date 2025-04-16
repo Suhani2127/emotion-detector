@@ -28,11 +28,11 @@ def get_emotion(text):
         return "Very Negative", -0.5
 
 emotion_map = {
-    "Very Positive": {"emoji": "😄", "color": "#f0fff4", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
-    "Positive": {"emoji": "🙂", "color": "#f0faff", "response": "Glad to hear you're feeling good today! Keep going 💪"},
-    "Neutral": {"emoji": "😐", "color": "#fafafa", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
-    "Negative": {"emoji": "🙁", "color": "#fff9e6", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
-    "Very Negative": {"emoji": "😢", "color": "#fff0f0", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
+    "Very Positive": {"emoji": "😄", "color": "#111", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
+    "Positive": {"emoji": "🙂", "color": "#111", "response": "Glad to hear you're feeling good today! Keep going 💪"},
+    "Neutral": {"emoji": "😐", "color": "#111", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
+    "Negative": {"emoji": "🙁", "color": "#111", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
+    "Very Negative": {"emoji": "😢", "color": "##111", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
 }
 
 # -------------------------------
