@@ -288,19 +288,7 @@ def emotion_therapist():
             }
             st.success("Journal saved successfully ✨")
 
-        # Journal Section
-        st.markdown("---")
-        st.subheader("📓 Journal Entry")
-        journal = st.text_area("Write a short journal entry to reflect on your thoughts:")
-        if st.button("Save Journal"):
-            if username not in st.session_state["journal_entries"]:
-                st.session_state["journal_entries"][username] = {}
-            st.session_state["journal_entries"][username][today] = {
-                "text": journal,
-                "emotion": emotion
-            }
-            st.success("Journal saved successfully ✨")
-
+      
     st.markdown("---")
 
 # -------------------------------
