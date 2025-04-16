@@ -20,19 +20,18 @@ st.session_state.setdefault("journal_entries", {})
 # -------------------------------
 # Emotion Analysis Logic
 # -------------------------------
+from transformers import pipeline
+
+# Load once
+emotion_classifier = pipeline("text-classification", model="nateraw/bert-base-uncased-emotion", return_all_scores=True)
+
 def get_emotion(text):
-    blob = TextBlob(text)
-    polarity = blob.sentiment.polarity
-    if polarity > 0.5:
-        return "Very Positive", polarity
-    elif polarity > 0:
-        return "Positive", polarity
-    elif polarity == 0:
-        return "Neutral", polarity
-    elif polarity > -0.5:
-        return "Negative", polarity
-    else:
-        return "Very Negative", polarity
+    scores = emotion_classifier(text)[0]
+    sorted_scores = sorted(scores, key=lambda x: x['score'], reverse=True)
+    top_emotion = sorted_scores[0]['label']
+    top_score = sorted_scores[0]['score']
+    return top_emotion.capitalize(), top_score
+
 
 emotion_map = {
     "Very Positive": {"emoji": "😄", "color": "#13c22a", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
@@ -40,7 +39,15 @@ emotion_map = {
     "Neutral": {"emoji": "😐", "color": "#abc213", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
     "Negative": {"emoji": "🙁", "color": "#c2135c", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
     "Very Negative": {"emoji": "😢", "color": "#c21319", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
+
+    "Joy": {"emoji": "😊", "color": "#E0F7FA", "response": "That’s wonderful to hear! 🌟 What made you feel joyful today?"},
+    "Sadness": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Do you want to talk about it?"},
+    "Anger": {"emoji": "😠", "color": "#FFE0B2", "response": "It's okay to feel angry. Would you like to vent or find ways to calm down?"},
+    "Love": {"emoji": "❤️", "color": "#FCE4EC", "response": "Love is such a beautiful emotion. Tell me more!"},
+    "Fear": {"emoji": "😨", "color": "#FFF3CD", "response": "It's natural to feel fear. You are safe here."},
+"Surprise": {"emoji": "😮", "color": "#E1F5FE", "response": "Surprises can be exciting or shocking. What happened?"}
 }
+
 
 therapist_replies = [
     "Tell me more about that...",
