@@ -1,4 +1,4 @@
-import  streamlit as st
+import streamlit as st
 from textblob import TextBlob
 import datetime
 import random
@@ -45,15 +45,6 @@ emotion_map = {
     "fear": {"emoji": "😨", "color": "#EAEAFF", "response": "Fear is a powerful emotion. Let's work through it together."}
 }
 
-mental_health_tips = {
-    "joy": ["Savor the moment with gratitude journaling.", "Share your happiness with someone—it amplifies the feeling!"],
-    "love": ["Send a kind message to someone you care about today.", "Practice self-love through affirmations or a relaxing activity."],
-    "surprise": ["Take a moment to breathe—surprises can bring growth!", "Write down your feelings—it helps make sense of the unexpected."],
-    "anger": ["Take a walk or do a quick stretch to release tension.", "Try deep breathing: inhale for 4, hold for 4, exhale for 6."],
-    "sadness": ["Watch or listen to something that brings you comfort.", "Reach out to a friend or write down how you’re feeling."],
-    "fear": ["Ground yourself with the 5-4-3-2-1 technique (see, hear, feel, smell, taste).", "Face fears gradually—small steps make a big impact."]
-}
-
 therapist_replies = [
     "Tell me more about that...",
     "How long have you been feeling this way?",
@@ -67,7 +58,7 @@ highlight_keywords = ["sad", "happy", "tired", "anxious", "hopeful", "angry", "e
 
 # -------------------------------
 # Styling
-
+# -------------------------------
 st.markdown("""
 <style>
 html, body, .main {
@@ -97,12 +88,24 @@ textarea, input {
     pointer-events: none;
     z-index: 9999;
 }
-st.markdown(f"""
-<div class="emoji-rain">
-    {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
-</div>
+.emoji-rain span {
+    position: absolute;
+    font-size: 3rem;
+    animation: fall linear infinite;
+    opacity: 1;
+}
+@keyframes fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(120vh) rotate(360deg);
+        opacity: 0.8;
+    }
+}
+</style>
 """, unsafe_allow_html=True)
-
 
 # -------------------------------
 # Auth Page
@@ -152,7 +155,7 @@ def emotion_therapist():
         # Emoji Rain
         st.markdown(f"""
         <div class="emoji-rain">
-            {''.join([f"<span style='left:{random.randint(0, 100)}vw'>{info['emoji']}</span>" for _ in range(80)])}
+            {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
         </div>
         """, unsafe_allow_html=True)
 
@@ -176,12 +179,6 @@ def emotion_therapist():
         st.markdown("---")
         st.subheader("💬 AI Therapist Says:")
         st.info(random.choice(therapist_replies))
-
-        # Mental health tips
-        if emotion in mental_health_tips:
-            st.markdown("---")
-            st.subheader("🧘 Mental Health Tip:")
-            st.success(random.choice(mental_health_tips[emotion]))
 
         # Journal Section
         st.markdown("---")
@@ -219,7 +216,27 @@ def emotion_therapist():
         st.info("No emotion entry recorded for this date.")
 
     # Heatmap
-    
+    if history:
+        st.markdown("---")
+        st.subheader("📈 Monthly Emotion Heatmap")
+
+        df = pd.DataFrame(list(history.items()), columns=["Date", "Emotion"])
+        df["Date"] = pd.to_datetime(df["Date"])
+        df["Day"] = df["Date"].dt.day
+        df["Month"] = df["Date"].dt.month
+        df["Emotion Level"] = df["Emotion"].map({
+            "sadness": -2,
+            "anger": -1,
+            "fear": -1,
+            "surprise": 0,
+            "love": 1,
+            "joy": 2
+        })
+
+        heatmap_data = df.pivot_table(index="Month", columns="Day", values="Emotion Level")
+        plt.figure(figsize=(15, 3))
+        sns.heatmap(heatmap_data, cmap="coolwarm", cbar_kws={'label': 'Emotion Intensity'}, linewidths=0.5, linecolor='white')
+        st.pyplot(plt)
 
     if st.button("🔓 Logout"):
         st.session_state["logged_in"] = False
