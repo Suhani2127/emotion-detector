@@ -227,12 +227,46 @@ def highlight_text(text):
     return text
 
 def emotion_therapist():
+    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
         emotion, score = get_emotion(user_input)
         info = emotion_map.get(emotion, {"emoji": "❓", "color": "#eee", "response": "I'm not sure how to categorize that emotion."})
+
+        # Emoji Rain
+        st.markdown(f"""
+        <div class="emoji-rain">
+            {''.join([f"<span style='left:{random.randint(0, 100)}vw; animation-duration: {random.uniform(2, 5)}s;'>{info['emoji']}</span>" for _ in range(50)])}
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(f"""
+            <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
+                <h2 style='color:#111;'>{info['emoji']} {emotion.capitalize()}</h2>
+                <p><strong>Confidence:</strong> {score}</p>
+                <hr />
+                <p style='font-size: 1.1rem;'>{info['response']}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        # Wellness Resources Section
+        st.markdown("---")
+        st.subheader("💆‍♀️ Wellness Resources")
+        
+        # Meditation Suggestion
+        display_meditation(emotion)
+
+        # Affirmation
+        display_affirmation(emotion)
+
+        # Emergency Contacts
+        manage_emergency_contacts()
+
+    st.markdown("---")
+    st.subheader("💬 AI Therapist Says:")  
+    st.info(random.choice(therapist_replies))
 
         # Emoji Rain
         st.markdown(f"""
