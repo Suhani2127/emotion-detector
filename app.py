@@ -8,6 +8,7 @@ import seaborn as sns
 import pandas as pd
 import re
 from transformers import pipeline
+import openai
 
 # Load advanced emotion classifier
 emotion_classifier = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base", return_all_scores=True)
@@ -108,6 +109,17 @@ textarea, input {
 """, unsafe_allow_html=True)
 
 # -------------------------------
+# Therapist Personas
+# -------------------------------
+therapist_personas = {
+    "Compassionate Counselor": "You are a compassionate counselor who always listens with empathy. You validate emotions gently and encourage self-kindness.",
+    "Motivational Coach": "You are a high-energy motivational coach who uplifts users with inspiring words and helps them reframe challenges positively.",
+    "Mindful Zen Guide": "You are a peaceful, Zen-like guide who helps users stay grounded through mindfulness, reflection, and breathing awareness.",
+    "Cognitive-Behavioral Strategist": "You are a logical and supportive therapist using Cognitive Behavioral Therapy to help users challenge negative thoughts and build positive behaviors.",
+    "Warm Best Friend": "You are a loving and understanding best friend who always knows what to say to comfort, cheer up, or support the user, no matter what."
+}
+
+# -------------------------------
 # Auth Page
 # -------------------------------
 def login_page():
@@ -146,6 +158,19 @@ def highlight_text(text):
 def emotion_therapist():
     st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
+
+    # Therapist Persona Selection
+    if "persona" not in st.session_state:
+        st.session_state.persona = "Compassionate Counselor"
+
+    st.sidebar.subheader("🧑‍⚕️ Choose Your Therapist Persona")
+    st.session_state.persona = st.sidebar.selectbox("Therapist Style", [
+        "Compassionate Counselor",
+        "Motivational Coach",
+        "Mindful Zen Guide",
+        "Cognitive-Behavioral Strategist",
+        "Warm Best Friend"
+    ])
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
@@ -194,58 +219,12 @@ def emotion_therapist():
             st.success("Journal saved successfully ✨")
 
     st.markdown("---")
-    st.subheader("📅 Your Emotion History")
-
-    selected_date = st.date_input("Pick a date to view past emotion")
-    username = st.session_state.get("username", "default")
-    history = st.session_state["emotion_history"].get(username, {})
-    date_str = selected_date.strftime("%Y-%m-%d")
-
-    if date_str in history:
-        past_emotion = history[date_str]
-        past_info = emotion_map.get(past_emotion, {"emoji": "❓"})
-        st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
-
-        journal_entries = st.session_state["journal_entries"].get(username, {})
-        if date_str in journal_entries:
-            st.markdown("---")
-            st.markdown("### 📝 Journal Reflection:")
-            highlighted = highlight_text(journal_entries[date_str]["text"])
-            st.markdown(highlighted)
-    else:
-        st.info("No emotion entry recorded for this date.")
-
-    # Heatmap
-    if history:
-        st.markdown("---")
-        st.subheader("📈 Monthly Emotion Heatmap")
-
-        df = pd.DataFrame(list(history.items()), columns=["Date", "Emotion"])
-        df["Date"] = pd.to_datetime(df["Date"])
-        df["Day"] = df["Date"].dt.day
-        df["Month"] = df["Date"].dt.month
-        df["Emotion Level"] = df["Emotion"].map({
-            "sadness": -2,
-            "anger": -1,
-            "fear": -1,
-            "surprise": 0,
-            "love": 1,
-            "joy": 2
-        })
-
-        heatmap_data = df.pivot_table(index="Month", columns="Day", values="Emotion Level")
-        plt.figure(figsize=(15, 3))
-        sns.heatmap(heatmap_data, cmap="coolwarm", cbar_kws={'label': 'Emotion Intensity'}, linewidths=0.5, linecolor='white')
-        st.pyplot(plt)
-
-    if st.button("🔓 Logout"):
-        st.session_state["logged_in"] = False
-        st.rerun()
 
 # -------------------------------
-# Main App Flow
+# Main App Logic
 # -------------------------------
 if not st.session_state["logged_in"]:
     login_page()
 else:
     emotion_therapist()
+
