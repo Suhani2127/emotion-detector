@@ -2,7 +2,7 @@ streamlit
 textblob
 matplotlib
 seaborn
-pandas\
+pandas
 transformers
 torch
 
