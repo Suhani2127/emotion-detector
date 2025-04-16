@@ -268,7 +268,7 @@ def emotion_therapist():
     st.subheader("💬 AI Therapist Says:")  
     st.info(random.choice(therapist_replies))
 
-    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
+
     st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
     user_input = st.text_area("💬 How are you feeling today?")
