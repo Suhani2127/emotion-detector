@@ -1,5 +1,6 @@
 import streamlit as st
 from textblob import TextBlob
+import datetime
 
 # -------------------------------
 # Dummy credentials (in-memory)
@@ -10,6 +11,9 @@ if "users" not in st.session_state:
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 
+if "emotion_history" not in st.session_state:
+    st.session_state["emotion_history"] = {}
+
 # -------------------------------
 # Emotion Analysis Logic
 # -------------------------------
@@ -17,22 +21,22 @@ def get_emotion(text):
     blob = TextBlob(text)
     polarity = blob.sentiment.polarity
     if polarity > 0.5:
-        return "Very Positive", 0.5
+        return "Very Positive", polarity
     elif polarity > 0:
-        return "Positive", 0.2
+        return "Positive", polarity
     elif polarity == 0:
-        return "Neutral", 0.0
+        return "Neutral", polarity
     elif polarity > -0.5:
-        return "Negative", -0.2
+        return "Negative", polarity
     else:
-        return "Very Negative", -0.5
+        return "Very Negative", polarity
 
 emotion_map = {
-    "Very Positive": {"emoji": "😄", "color": "#111", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
-    "Positive": {"emoji": "🙂", "color": "#111", "response": "Glad to hear you're feeling good today! Keep going 💪"},
-    "Neutral": {"emoji": "😐", "color": "#111", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
-    "Negative": {"emoji": "🙁", "color": "#111", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
-    "Very Negative": {"emoji": "😢", "color": "##111", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
+    "Very Positive": {"emoji": "😄", "color": "#f0fff4", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
+    "Positive": {"emoji": "🙂", "color": "#f0faff", "response": "Glad to hear you're feeling good today! Keep going 💪"},
+    "Neutral": {"emoji": "😐", "color": "#fafafa", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
+    "Negative": {"emoji": "🙁", "color": "#fff9e6", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
+    "Very Negative": {"emoji": "😢", "color": "#fff0f0", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
 }
 
 # -------------------------------
@@ -43,6 +47,7 @@ st.markdown("""
 html, body, .main {
     background-color: white;
     color: #222;
+    font-family: 'Segoe UI', sans-serif;
 }
 textarea {
     background-color: #fff !important;
@@ -62,6 +67,7 @@ def login_page():
     if st.button("Login"):
         if username in st.session_state["users"] and st.session_state["users"][username] == password:
             st.session_state["logged_in"] = True
+            st.session_state["username"] = username
             st.success("Logged in successfully ✅")
         else:
             st.error("Invalid credentials ❌")
@@ -100,6 +106,27 @@ def emotion_therapist():
         """, unsafe_allow_html=True)
 
         st.toast(f"{info['emoji']} Emotion Detected: {emotion}")
+
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        username = st.session_state.get("username", "default")
+        if username not in st.session_state["emotion_history"]:
+            st.session_state["emotion_history"][username] = {}
+        st.session_state["emotion_history"][username][today] = emotion
+
+    st.markdown("---")
+    st.subheader("📅 Your Emotion History")
+
+    selected_date = st.date_input("Pick a date to view past emotion")
+    username = st.session_state.get("username", "default")
+    history = st.session_state["emotion_history"].get(username, {})
+    date_str = selected_date.strftime("%Y-%m-%d")
+
+    if date_str in history:
+        past_emotion = history[date_str]
+        past_info = emotion_map[past_emotion]
+        st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
+    else:
+        st.info("No emotion entry recorded for this date.")
 
     if st.button("🔓 Logout"):
         st.session_state["logged_in"] = False
