@@ -26,13 +26,13 @@ if user_input:
     polarity = blob.sentiment.polarity
 
     # Decide emotion
-    if polarity > 0.4:
+    if polarity > 0.5:
         emotion = "Very Positive"
     elif polarity > 0:
         emotion = "Positive"
     elif polarity == 0:
         emotion = "Neutral"
-    elif polarity > -0.1:
+    elif polarity > -0.5:
         emotion = "Negative"
     else:
         emotion = "Very Negative"
