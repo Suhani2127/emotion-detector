@@ -1,6 +1,5 @@
-
 import streamlit as st
-from textblob import TextBlob
+from transformers import pipeline
 import datetime
 import random
 import calendar
@@ -10,21 +9,28 @@ import pandas as pd
 import re
 
 # -------------------------------
+# Emotion Classifier with Hugging Face
+# -------------------------------
+emotion_classifier = pipeline("text-classification", model="nateraw/bert-base-uncased-emotion", return_all_scores=True)
+
+# -------------------------------
 # Dummy credentials (in-memory)
 # -------------------------------
-st.session_state.setdefault("users", {"admin": "1234"})  # default user
-st.session_state.setdefault("logged_in", False)
-st.session_state.setdefault("emotion_history", {})
-st.session_state.setdefault("journal_entries", {})
+if "users" not in st.session_state:
+    st.session_state["users"] = {"admin": "1234"}  # default user
+
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if "emotion_history" not in st.session_state:
+    st.session_state["emotion_history"] = {}
+
+if "journal_entries" not in st.session_state:
+    st.session_state["journal_entries"] = {}
 
 # -------------------------------
 # Emotion Analysis Logic
 # -------------------------------
-from transformers import pipeline
-
-# Load once
-emotion_classifier = pipeline("text-classification", model="nateraw/bert-base-uncased-emotion", return_all_scores=True)
-
 def get_emotion(text):
     scores = emotion_classifier(text)[0]
     sorted_scores = sorted(scores, key=lambda x: x['score'], reverse=True)
@@ -32,22 +38,14 @@ def get_emotion(text):
     top_score = sorted_scores[0]['score']
     return top_emotion.capitalize(), top_score
 
-
 emotion_map = {
-    "Very Positive": {"emoji": "😄", "color": "#13c22a", "response": "That’s amazing! Keep embracing those joyful moments! 🌟"},
-    "Positive": {"emoji": "🙂", "color": "#139cc2", "response": "Glad to hear you're feeling good today! Keep going 💪"},
-    "Neutral": {"emoji": "😐", "color": "#abc213", "response": "It’s okay to feel neutral sometimes. Take a breath and keep moving 💫"},
-    "Negative": {"emoji": "🙁", "color": "#c2135c", "response": "It’s okay to feel low. You’re not alone in this ❤️"},
-    "Very Negative": {"emoji": "😢", "color": "#c21319", "response": "I'm really sorry you're feeling this way. Please be kind to yourself 🫂"}
-
     "Joy": {"emoji": "😊", "color": "#E0F7FA", "response": "That’s wonderful to hear! 🌟 What made you feel joyful today?"},
     "Sadness": {"emoji": "😢", "color": "#F8D7DA", "response": "I'm really sorry you're feeling this way. Do you want to talk about it?"},
     "Anger": {"emoji": "😠", "color": "#FFE0B2", "response": "It's okay to feel angry. Would you like to vent or find ways to calm down?"},
     "Love": {"emoji": "❤️", "color": "#FCE4EC", "response": "Love is such a beautiful emotion. Tell me more!"},
     "Fear": {"emoji": "😨", "color": "#FFF3CD", "response": "It's natural to feel fear. You are safe here."},
-"Surprise": {"emoji": "😮", "color": "#E1F5FE", "response": "Surprises can be exciting or shocking. What happened?"}
+    "Surprise": {"emoji": "😮", "color": "#E1F5FE", "response": "Surprises can be exciting or shocking. What happened?"}
 }
-
 
 therapist_replies = [
     "Tell me more about that...",
@@ -122,18 +120,18 @@ def highlight_text(text):
     return text
 
 def emotion_therapist():
-    st.markdown("<h2 style='text-align:center;'>AI Emotion Analyser </h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond to best of my abilities</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>🧠 AI Emotion Therapist</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;'>Tell me how you're feeling — I’ll respond with empathy 💖</p>", unsafe_allow_html=True)
 
     user_input = st.text_area("💬 How are you feeling today?")
     if user_input:
-        emotion, polarity = get_emotion(user_input)
-        info = emotion_map[emotion]
+        emotion, score = get_emotion(user_input)
+        info = emotion_map.get(emotion, {"emoji": "🤔", "color": "#F4F4F4", "response": "I'm thinking about how you're feeling..."})
 
         st.markdown(f"""
             <div style='background-color:{info['color']}; padding: 1.5rem; border-radius: 16px; text-align:center; border: 1px solid #bbb;'>
                 <h2 style='color:#111;'>{info['emoji']} {emotion}</h2>
-                <p><strong>Polarity:</strong> {round(polarity, 2)}</p>
+                <p><strong>Confidence:</strong> {round(score * 100, 2)}%</p>
                 <hr />
                 <p style='font-size: 1.1rem;'>{info['response']}</p>
             </div>
@@ -148,7 +146,7 @@ def emotion_therapist():
         st.session_state["emotion_history"][username][today] = emotion
 
         st.markdown("---")
-        st.subheader("💬 Record the answers to:")
+        st.subheader("💬 AI Therapist Says:")
         st.info(random.choice(therapist_replies))
 
         # Journal Section
@@ -174,7 +172,7 @@ def emotion_therapist():
 
     if date_str in history:
         past_emotion = history[date_str]
-        past_info = emotion_map[past_emotion]
+        past_info = emotion_map.get(past_emotion, {"emoji": "🤔", "color": "#EEE"})
         st.markdown(f"**{date_str}:** {past_info['emoji']} {past_emotion}")
 
         journal_entries = st.session_state["journal_entries"].get(username, {})
@@ -196,11 +194,13 @@ def emotion_therapist():
         df["Day"] = df["Date"].dt.day
         df["Month"] = df["Date"].dt.month
         df["Emotion Level"] = df["Emotion"].map({
-            "Very Negative": -2,
-            "Negative": -1,
+            "Sadness": -2,
+            "Fear": -1,
             "Neutral": 0,
-            "Positive": 1,
-            "Very Positive": 2
+            "Joy": 2,
+            "Anger": -1,
+            "Surprise": 1,
+            "Love": 2
         })
 
         heatmap_data = df.pivot_table(index="Month", columns="Day", values="Emotion Level")
@@ -219,3 +219,4 @@ if not st.session_state["logged_in"]:
     login_page()
 else:
     emotion_therapist()
+
