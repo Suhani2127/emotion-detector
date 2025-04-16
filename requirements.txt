@@ -1,3 +1,5 @@
 streamlit
 textblob
-nltk
+matplotlib
+seaborn
+pandas
