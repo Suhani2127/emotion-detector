@@ -162,7 +162,7 @@ textarea, input {
 .emoji-rain span {
     position: absolute;
     font-size: 3rem;
-    animation: fall linear infinite;
+    animation: fall linear 5s forward;
     opacity: 1;
 }
 @keyframes fall {
